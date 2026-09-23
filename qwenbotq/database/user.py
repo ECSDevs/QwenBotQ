@@ -3,7 +3,6 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-from typing import Annotated
 from datetime import datetime, date, timedelta
 
 from pydantic import BaseModel, Field, field_validator

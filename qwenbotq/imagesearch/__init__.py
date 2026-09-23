@@ -17,7 +17,6 @@ from arclet.alconna import StrMulti
 from nonebot_plugin_alconna import (
     Alconna,
     on_alconna,
-    Image,
     Args,
     Match,
     Option,
@@ -30,7 +29,6 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
 )
 
-from PicImageSearch import EHentai
 from ehentaix import EHentaiClient, santize_album_name
 from py7zr import SevenZipFile
 from httpx import AsyncClient
@@ -46,7 +44,6 @@ from ..help import Help
 
 Help.append_help("""
 【图片搜索】
-找本子 [图片] — 以图搜本
 下本子 <URL> — 下载本子
 搜本子 <关键词> [-l 数量] [-e] — 搜索本子
 下一页 — 查看搜索结果下一页
@@ -80,36 +77,6 @@ def cookies_format(cookies: str):
 
 
 cookies = cookies_format((config.imagesearch.exhentai_cookies or "").strip())
-
-
-FindBookMatcher = on_alconna(Alconna("找本子", Args["image?", Image]), block=True)
-
-
-@FindBookMatcher.handle()
-async def find_book(image: Match[Image], event: MessageEvent):
-    if not image.available:
-        await FindBookMatcher.finish("用法：找本子 [图片]", at_sender=at_sender(event))
-
-    ex_cookie = (config.imagesearch.exhentai_cookies or "").strip()
-
-    ehentai = EHentai(is_ex=bool(ex_cookie), cookies=ex_cookie, verify_ssl=False)
-    res = await ehentai.search(url=image.result.url)
-
-    if not res.raw:
-        await FindBookMatcher.send(
-            f"\n{image.result.url}\n没有找到本子", at_sender=at_sender(event)
-        )
-
-    for r in res.raw:
-        await FindBookMatcher.send(
-            "\n" + MessageSegment.image(r.thumbnail) + f"\n{r.title}"
-            f"\n{r.type} {r.date}"
-            f'\n{" ".join(r.tags)}'
-            f"\n{r.url}",
-            at_sender=at_sender(event),
-        )
-
-    await FindBookMatcher.finish()
 
 
 DownloadBookMatcher = on_alconna(Alconna("下本子", Args["url?", "url"]), block=True)

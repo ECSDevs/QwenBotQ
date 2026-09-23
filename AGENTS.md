@@ -9,6 +9,7 @@ QwenBotQ is a Python NoneBot2 QQ entertainment bot using the OneBot v11 adapter.
 - `qwenbotq/config_model/`: Pydantic models for `config.yml`.
 - `qwenbotq/imagesearch/`, `fileserver.py`, `imagecache.py`: image search/download, HTTP file serving, and recalled-image caching.
 - `binding.py`, `usersystem.py`, `lottery.py`, `bilinotice.py`, `superuser.py`: feature plugins; several are enabled only when their config section is populated.
+- `blackjack.py`、`blackjack_logic.py`：21点多人押注小游戏（`blackjack_logic.py` 为纯规则逻辑，不依赖 NoneBot/数据库，单元测试直接加载；`blackjack.py` 为命令与内存态房间，key=会话ID，无数据库持久化，积分即时扣/退/结算，大厅/对局超时自动退款或强制结算）。
 - `lognotice.py`: always-on loguru sink that forwards WARNING and above logs to every configured superuser's private chat. Registered via an `on_startup` hook that captures the running event loop and adds the sink with a self-name filter and a 5-second `(name, message)` dedup window to prevent recursion and flooding. Forwarding is scheduled with `asyncio.run_coroutine_threadsafe` so it works from any thread; sending failures are swallowed silently to avoid recursive logging.
 - `ehentaix/`: local editable `ehentaix` library for E-Hentai searching/downloading, with its own `pyproject.toml` and live integration scripts.
 - `downloads/`: runtime cache/download data; do not treat it as source code.

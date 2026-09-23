@@ -10,7 +10,6 @@ from .user import User, apply_bind, get_biggest_coins
 from .vip import get_vip, buy_vip
 from .agents import Agent
 from .lottery import LotteryTicket
-from .bindrequest import BindRequest
 from .recalloffset import (
     RecallOffset,
     get_recall_offset,
@@ -43,7 +42,6 @@ __all__ = [
     "buy_vip",
     "Agent",
     "LotteryTicket",
-    "BindRequest",
     "RecallOffset",
     "get_recall_offset",
     "set_recall_offset",

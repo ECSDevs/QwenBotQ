@@ -16,6 +16,7 @@ from .database import DatabaseConfig
 from .focus import FocusOptions
 from .price import PriceConfig
 from .lottery import LotteryConfig
+from .blackjack import BlackjackConfig
 from .imagesearch import ImageSearchConfig
 from .fileserver import FileServerConfig
 
@@ -31,6 +32,7 @@ class Config(BaseModel):
     price: PriceConfig = PriceConfig()  # 价格配置
     focus: FocusOptions | None = None  # 关注配置
     lottery: LotteryConfig = LotteryConfig()  # 抽奖配置
+    blackjack: BlackjackConfig = BlackjackConfig()  # 21点配置
     imagesearch: ImageSearchConfig = ImageSearchConfig()  # 图片搜索配置
     fileserver: FileServerConfig = FileServerConfig()  # 文件服务器配置
 

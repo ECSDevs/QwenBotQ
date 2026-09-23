@@ -65,8 +65,6 @@ database:
 price:
   daily_sign_max_coins: 50 # 每日签到最大积分
   daily_sign_min_coins: 1 # 每日签到最小积分
-  refresh_price: 1 # 换老婆价格
-  renew_cost: 1 # 续费老婆价格
 
 # ============ 哔哩哔哩动态订阅配置（可选，不填则关闭） ============
 focus:
@@ -87,6 +85,12 @@ lottery:
     - "123456789"
   ticket_price: 200 # 每注价格
   reward_per_match: 200 # 每匹配一位的奖励
+
+# ============ 21点游戏配置 ============
+blackjack:
+  groups: [] # 开启21点的群号列表（空列表表示所有会话都可玩）
+  min_bet: 10 # 最低押注积分
+  lobby_timeout: 300 # 大厅超时未开始/对局超时无行动的秒数，超时自动退款/结算
 
 # ============ 文件服务器配置（供 OneBot/QQ 端拉取文件） ============
 fileserver:

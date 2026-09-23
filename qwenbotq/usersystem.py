@@ -33,6 +33,7 @@ Help.append_help("""
 签到 — 每日签到领取积分
 用户信息 [@用户] — 查看用户信息
 转账给 @用户 <积分数量> — 转账积分
+积分榜 — 查看积分排名前10的用户（群聊显示群内排名）
 """)
 
 
@@ -146,6 +147,86 @@ async def transfer(
     await TransferMatcher.finish(
         f"\n您的积分余额不足以转账{amount.result}积分！", at_sender=at_sender(event)
     )
+
+
+async def _fetch_group_members(group_id: int, bot: Bot) -> list[dict] | None:
+    "获取群成员列表（失败返回 None）"
+    try:
+        return await bot.get_group_member_list(  # type: ignore
+            group_id=group_id
+        )
+    except Exception:
+        return None
+
+
+async def _rank_nick_map(
+    session_id: str,
+    user_ids: list[str],
+    bot: Bot,
+    members: list[dict] | None = None,
+) -> dict[str, str]:
+    "批量获取榜单用户昵称（群聊优先使用已拉取的群成员，其余回退逐个查询）"
+    nick_map: dict[str, str] = {}
+    if members:
+        nick_map = {
+            str(m["user_id"]): m["card"] or m["nickname"]
+            for m in members
+            if str(m["user_id"]) in user_ids
+        }
+    for uid in user_ids:
+        if uid not in nick_map:
+            nick_map[uid] = await get_nick(session_id, uid, bot)
+    return nick_map
+
+
+CoinsRankMatcher = on_alconna(Alconna("积分榜"), block=True)
+
+
+@CoinsRankMatcher.handle()
+async def coins_rank(
+    user: Annotated[User, require()],
+    bot: Bot,
+    event: MessageEvent,
+):
+    "积分榜"
+
+    session_id = get_session_id(event)
+    # 群聊时限定为群内成员计算排名（拉取失败则回退到全站）
+    members: list[dict] | None = None
+    member_ids: set[str] | None = None
+    if session_id.startswith("g"):
+        members = await _fetch_group_members(int(session_id[1:]), bot)
+        if members is not None:
+            member_ids = {str(m["user_id"]) for m in members}
+
+    scope: dict | None = None
+    if member_ids is not None:
+        scope = {"id": {"$in": list(member_ids)}}
+
+    top_users = await User.find(scope, sort=["-coins"], limit=10).to_list()
+    ids = [u.id for u in top_users]
+
+    real_rank = None
+    if user.id not in ids:
+        # 不在榜单内：用自己替换第10名，并记录实际排行（群聊内为群内排行）
+        rank_filter: dict = {"coins": {"$gt": user.coins}}
+        if member_ids is not None:
+            rank_filter["id"] = {"$in": list(member_ids)}
+        real_rank = (await User.find(rank_filter).count()) + 1
+        top_users[-1] = user
+        ids[-1] = user.id
+
+    nick_map = await _rank_nick_map(session_id, ids, bot, members)
+
+    lines = []
+    for rank, u in enumerate(top_users, 1):
+        mark = " [我]" if u.id == user.id else ""
+        show_rank = real_rank if mark else rank
+        lines.append(f"{show_rank}. {nick_map[u.id]}{mark} — {u.coins}积分")
+
+    title = "群内积分榜 Top10" if member_ids is not None else "积分榜 Top10"
+    msg = f"\n【{title}】\n" + "\n".join(lines)
+    await CoinsRankMatcher.finish(msg, at_sender=at_sender(event))
 
 
 set_vip_cmd = Alconna("!renewvip", Args["session_id?", str]["days?", int])

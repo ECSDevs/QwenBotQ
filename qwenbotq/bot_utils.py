@@ -21,7 +21,7 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     MessageSegment,
 )
-from nonebot.adapters.onebot.v11.event import Event, Reply
+from nonebot.adapters.onebot.v11.event import Event
 from nonebot.adapters.onebot.v11.bot import send as ob_send
 
 from . import config
@@ -68,43 +68,8 @@ def require(
     return Depends(_require, validate=True)
 
 
-def reply(required: bool = False) -> Reply | None:
-    "获取单条回复信息"
-
-    async def _reply(matcher: Matcher, event: MessageEvent):
-        if required and not event.reply:
-            await matcher.finish(
-                "\n必须回复一条消息才能使用此功能", at_sender=at_sender(event)
-            )
-        return event.reply
-
-    return Depends(_reply, validate=True)
-
-
 def reply_segment(id: int) -> Message:
     return Message(MessageSegment.reply(id))
-
-
-def preprocess_reply(msg: Message) -> Message:
-    return msg
-
-
-async def _get_flow_replies(bot: Bot, event: MessageEvent) -> list[Reply] | None:
-    "获取回复链"
-    if not event.reply:
-        return None
-    replies = [event.reply]
-    while r := preprocess_reply(replies[-1].message)["reply"]:
-        reply = await bot.get_msg(message_id=r[0].data["id"])
-        replies.append(Reply.model_validate(reply))
-    return list(reversed(replies))
-
-
-get_flow_replies = Depends(_get_flow_replies, validate=True)
-
-
-def boolize(i: str | None) -> bool:
-    return i.strip()[0].lower() in ("t", "y", "是", "真", "启") if i else False
 
 
 def at_sender(event: MessageEvent) -> bool:
@@ -200,16 +165,3 @@ def nick_getter() -> nick_getter_type:
         return _get_nick
 
     return Depends(_nick_getter, validate=True)
-
-
-async def send_session(bot: Bot, session_id: str, message: Message | str):
-    if session_id.startswith("g"):
-        await bot.send_group_msg(
-            group_id=int(session_id[1:]),
-            message=message,
-        )
-    else:
-        await bot.send_private_msg(
-            user_id=int(session_id[1:]),
-            message=message,
-        )

@@ -14,7 +14,7 @@ from typing import Any
 from httpx import AsyncClient
 from nonebot.log import logger
 
-from .config_model.ai import LLMModelConfig, ModelsDevConfig
+from config.ai import LLMModelConfig, ModelsDevConfig
 
 
 async def _download(url: str) -> dict:

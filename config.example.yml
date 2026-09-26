@@ -1,5 +1,7 @@
-# QwenBotQ 配置文件示例
-# 复制本文件为 config.yml 并填入实际值
+# QwenBotQ 配置文件字段说明与示例
+# 实际使用的 config.yml 位于仓库根目录，首次启动会自动按默认值生成，
+# 并在之后每次启动自动补全缺失字段（已填写的取值不会被覆盖），无需手动复制本文件
+# 本文件仅作为带注释的字段参考
 # (*) 为必填项
 # 可选项内有必填项的，只能整个不填或者填写所有必填项，整个不填代表关闭该模块
 
@@ -101,3 +103,14 @@ fileserver:
 # ============ 图片搜索配置 ============
 imagesearch:
   exhentai_cookies: null # ExHentai Cookies（可选，不填则无法搜索ExHentai）
+
+# ============ 自动更新配置（可选，整个不填则关闭） ============
+# 由与主插件分开加载的 autoupdate 插件实现：定时 fetch 远端，发现远端领先时
+# 私信提醒所有超管，超管回复 !update 后才执行 `git pull --ff-only` 并重启机器人
+# （重启沿用当前启动命令）。
+autoupdate:
+  enable: true # 是否启用自动更新
+  interval: 300 # 检查间隔（秒），最小 10
+  remote: origin # 远端名
+  branch: null # 跟踪分支（可选，不填则使用当前分支）
+  restart_command: null # 重启命令（可选，不填则沿用当前启动命令）

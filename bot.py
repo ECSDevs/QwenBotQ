@@ -34,5 +34,7 @@ driver = nonebot.get_driver()
 driver.register_adapter(OnebotV11Adapter)
 
 if __name__ == "__main__":
+    # 自动更新插件与主插件分开加载，主插件导入失败时仍能自动拉取修复并重启
+    nonebot.load_plugin("autoupdate")
     nonebot.load_plugin("qwenbotq")
     nonebot.run()

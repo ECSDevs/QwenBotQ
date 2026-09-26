@@ -6,9 +6,10 @@
 from collections.abc import Sequence, Mapping
 from typing import Any
 
+from config.ai import AgentLike
+
 from .. import config
 from ..database import Agent
-from ..config_model.ai import AgentLike
 
 
 async def get_sysprompt(id: str) -> Agent | AgentLike | None:
